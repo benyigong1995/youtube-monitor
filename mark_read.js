@@ -1,4 +1,4 @@
-import { updateChannelState } from './src/state.js';
+import { markAsRead } from './src/db.js';
 
 // Usage: node mark_read.js <channelId> <videoTitle> <videoUrl>
 
@@ -10,9 +10,14 @@ if (args.length < 3) {
 
 const [channelId, videoTitle, videoUrl] = args;
 
-await updateChannelState(channelId, {
+// We construct a mock item object to fit the DB schema
+const mockItem = {
+  id: "manual-" + Date.now(),
   title: videoTitle,
-  link: videoUrl
-});
+  link: videoUrl,
+  pubDate: new Date().toISOString()
+};
+
+await markAsRead(channelId, mockItem);
 
 console.log(`Marked ${channelId} as read: ${videoTitle}`);

@@ -1,6 +1,9 @@
 import { fetchLatestVideos } from './src/rss.js';
-import { loadState, updateChannelState, getLastSeenVideo } from './src/state.js';
+import { getLastSeenVideo, markAsRead, initChannel } from './src/db.js';
 import fs from 'fs/promises';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Load Config
 const config = JSON.parse(await fs.readFile(new URL('./config.json', import.meta.url)));
@@ -9,6 +12,9 @@ async function check() {
   const newVideos = [];
 
   for (const channel of config.channels) {
+    // Ensure channel exists in DB
+    await initChannel(channel);
+
     // console.log(`Checking ${channel.id}...`);
     const videos = await fetchLatestVideos(channel.rss);
     
@@ -27,15 +33,17 @@ async function check() {
         video: latestVideo
       });
       
-      // We update state *after* processing (or let the caller handle it)
-      // For this script, we just Identify. The Agent will Confirm (update state) after processing.
-      // Actually, to avoid spamming if the agent fails, maybe we shouldn't update state here?
-      // Let's output the new videos, and provide a separate flag/script to "mark as read".
+      // In a real automated loop, we might mark as read AFTER successful processing.
+      // But for this "Scanner" mode, we verify first.
     }
   }
 
   // Output JSON for the Agent to parse
-  console.log(JSON.stringify(newVideos, null, 2));
+  if (newVideos.length > 0) {
+    console.log(JSON.stringify(newVideos, null, 2));
+  } else {
+    // console.log("[]"); // Silent is better
+  }
 }
 
 check();

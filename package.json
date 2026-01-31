@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
+    "dotenv": "^17.2.3",
     "rss-parser": "^3.13.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7",
     "youtube-transcript": "^1.2.1"
   }
 }
